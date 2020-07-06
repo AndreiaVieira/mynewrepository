@@ -1,0 +1,112 @@
+---
+title: "COVID19_AM"
+author: "Andreia Vieira"
+date: "04/07/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Output
+
+```{r , echo = TRUE}
+
+library(leaflet)
+library(dplyr)
+
+# Leitura dos dados
+covid<-setwd("C:/Mana/ACursoCienciadeDados/Aulas/Desenvolvendo Dados/Semana2/Agora/COVID")
+covid<-read.csv("./COVID2019.csv", header=TRUE, sep=";")
+covid
+
+#Grupos
+covid <- covid %>%
+dplyr::mutate(grupo = cut(TAXACOVID, breaks = c(0, 500, 1000, 2000, Inf), labels = c("Abaixo de 500", "Entre 500 e 1000", "Entre 1000 e 2000", "Acima de 2000"))) 
+
+# Verificiar incidência da doença
+leaflet() %>%
+addTiles() %>%
+addCircleMarkers(data=covid, lat = ~LATITUDE, lng =~LONGITUDE, radius = ~sqrt(covid$POPULACAO/1000),
+popup = ~htmltools::htmlEscape(covid$POPULACAO),
+color = c("black"),
+stroke = FALSE, fillOpacity = 1)->map1
+map1
+
+
+#pal<- ("#EE4540", "#801336", "#2D132C", "#571B7E")
+#,c("abaixo de 500", "entre 500 e 1000", "entre 1000 e 1500", "acima de 2000")), 
+
+#bins<- c(0, 500, 1000, 2000, Inf)
+#pal1 <- colorBin("YlOrGn", domain = #covid$TAXACOVID, bins = bins)
+
+pal3<-colorFactor(c("#ffce00","#ff9a00","#EE4540","#933b27"), domain = covid$grupo, reverse = FALSE)
+                    
+                    
+#pal2 <- colorFactor(c("#E7305B", #"#EE4540","#C72c41","#801336"), 
+ #domain = covid$grupo, ordered = FALSE)
+
+
+#pal<-c("#D92027", "#EE4540", "#C72c41", "##801336")
+leaflet()%>%
+addTiles() %>%
+addCircleMarkers(data=covid,
+                 lat = ~LATITUDE, 
+                 lng = ~LONGITUDE, 
+                 radius = ~sqrt(covid$POPULACAO/1000),
+                 
+                color = ~pal3(covid$grupo),                #color=c("#E7305B", "#EE4540","#C72c41","#801336"),
+                 popup = ~htmltools::htmlEscape(covid$grupo),
+                 stroke = FALSE, fillOpacity = 1)->map2
+
+
+map2%>% addLegend("topright", pal = pal3 ,  values = covid$grupo,title = 'COVID19 - MANAUS/AM', opacity = 1) -> map3
+map3
+
+library(htmltools)
+browsable(
+  tagList(list(
+    tags$head(
+      tags$style(
+        ".leaflet .legend {
+                 line-height: 13px;
+                 font-size: 7px;
+                 }",
+        ".leaflet .legend i{
+            border-radius: 50%;
+            width:5px;
+            height: 5px;
+            margin-top: 2px;
+            } "
+       )
+     ),
+    map3
+  ))
+)
+
+
+
+
+
+
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
